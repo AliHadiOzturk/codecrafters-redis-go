@@ -29,6 +29,26 @@ func (n *NetManager) Init() {
 	}
 }
 
+func (n *NetManager) HandleConnection(connection net.Conn) {
+	defer connection.Close()
+
+	for {
+		data := make([]byte, 1024)
+	
+		connection.Read(data)
+	
+		fmt.Println("Received data: ", string(data))
+	
+		_, err := connection.Write([]byte("+PONG\r\n"))
+	
+		if err != nil {
+			fmt.Println("Error writing to connection: ", err.Error())
+			os.Exit(1)
+		}
+	}
+
+}
+
 func (n *NetManager) Start() {
 	for {
 		connection, err := (*n.listener).Accept()
@@ -36,19 +56,11 @@ func (n *NetManager) Start() {
 			fmt.Println("Error accepting connection: ", err.Error())
 		}
 
-		data := make([]byte, 1024)
-
-		connection.Read(data)
-
-		fmt.Println("Received data: ", string(data))
-
-		_, err = connection.Write([]byte("+PONG\r\n"))
-
-		if err != nil {
-			fmt.Println("Error writing to connection: ", err.Error())
-			os.Exit(1)
-		}
-
-		connection.Close()
+		go n.HandleConnection(connection)
+		// connection.Close()
 	}
+}
+
+func (n *NetManager) Stop() {
+	(*n.listener).Close()
 }
