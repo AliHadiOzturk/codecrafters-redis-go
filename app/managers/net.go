@@ -57,7 +57,6 @@ func (n *NetManager) Start() {
 		}
 
 		go n.HandleConnection(connection)
-		// connection.Close()
 	}
 }
 
