@@ -2,9 +2,12 @@ package resp
 
 import (
 	"fmt"
+	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/codecrafters-io/redis-starter-go/app/models"
+	"github.com/codecrafters-io/redis-starter-go/commands"
 )
 
 type RESPArray struct {
@@ -14,7 +17,9 @@ type RESPArray struct {
 
 func NewArray(data []byte) *RESPArray {
 	return &RESPArray{Message: models.Message{Data: data, Responses: map[string]interface{}{
+		"":     "-ERR COMMAND NOT FOUND",
 		"PING": "+PONG",
+		"ECHO": commands.Echo,
 	}}}
 }
 
@@ -40,11 +45,45 @@ func (r *RESPArray) Decode() {
 }
 
 func (r *RESPArray) Handle() {
-	// Nothing to handle in simple string
+
+	strs := strings.Split(string(r.Data), "\r\n")
+
+	parameterCount, _ := strconv.Atoi(strings.Split(string(strs[0]), "")[1])
+
+	parameterCount = parameterCount - 1
+
+	println("Parameter Count: ", parameterCount)
+
+	for i := 3; i < len(strs); i++ {
+		if i+1 == len(strs) {
+			break
+		}
+		r.Args = append(r.Args, strs[i+1])
+	}
+
 }
 
 func (r *RESPArray) Encode() []byte {
 	response := r.Responses[r.Command]
+
+	if response == nil {
+		response = r.Responses[strings.ToUpper(r.Command)]
+	}
+
+	if reflect.TypeOf(response).Kind() == reflect.Func {
+		resp, err := response.(func([]string) (string, error))(r.Args)
+
+		if err != nil {
+			// Implement error handling
+		} else {
+			response = resp
+		}
+
+	}
+
+	if response == nil {
+		response = r.Responses[""]
+	}
 
 	formatted := fmt.Sprintf("%s\r\n", response)
 

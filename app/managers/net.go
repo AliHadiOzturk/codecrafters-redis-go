@@ -70,6 +70,9 @@ func (c *Client) Init() {
 		// 		// break
 		// 	}
 		case message := <-c.message:
+			if len(message) == 0 {
+				continue
+			}
 			c.connection.Write(utils.MessageHandler(message).Process())
 		}
 	}
@@ -90,8 +93,14 @@ func (c *Client) Read() {
 			}
 		}
 
-		fmt.Println("Received data: ", string(read[:count]))
-		c.message <- read[:count]
+		if count == 0 {
+			continue
+		}
+
+		message := read[:count]
+
+		fmt.Println("Received data: ", string(message))
+		c.message <- message
 	}
 }
 

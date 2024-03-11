@@ -8,10 +8,10 @@ func main() {
 
 	netManager := managers.NewNetManager()
 	go netManager.Init()
-	go netManager.Start()
+	netManager.Start()
 
-	func() {
-		for {
-		}
-	}()
+	// func() {
+	// 	for {
+	// 	}
+	// }()
 }
