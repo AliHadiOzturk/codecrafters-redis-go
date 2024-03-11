@@ -20,6 +20,8 @@ func NewArray(data []byte) *RESPArray {
 		"":     "-ERR COMMAND NOT FOUND",
 		"PING": "+PONG",
 		"ECHO": commands.Echo,
+		"SET":  commands.Set,
+		"GET":  commands.Get,
 	}}}
 }
 
@@ -54,7 +56,7 @@ func (r *RESPArray) Handle() {
 
 	println("Parameter Count: ", parameterCount)
 
-	for i := 3; i < len(strs); i++ {
+	for i := 3; i < len(strs); i += 2 {
 		if i+1 == len(strs) {
 			break
 		}
@@ -70,7 +72,7 @@ func (r *RESPArray) Encode() []byte {
 		response = r.Responses[strings.ToUpper(r.Command)]
 	}
 
-	if reflect.TypeOf(response).Kind() == reflect.Func {
+	if response != nil && reflect.TypeOf(response).Kind() == reflect.Func {
 		resp, err := response.(func([]string) (string, error))(r.Args)
 
 		if err != nil {
