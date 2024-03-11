@@ -32,7 +32,7 @@ type NetManager struct {
 	unregister chan *Client
 }
 
-func NewNetManager() *NetManager {
+func NewNetManager(port string) *NetManager {
 	nm := NetManager{
 		clients:    make(map[*Client]bool),
 		broadcast:  make(chan []byte),
@@ -40,7 +40,7 @@ func NewNetManager() *NetManager {
 		unregister: make(chan *Client),
 	}
 
-	l, err := net.Listen("tcp", "0.0.0.0:6379")
+	l, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
 
 	nm.listener = &l
 
@@ -49,7 +49,7 @@ func NewNetManager() *NetManager {
 		os.Exit(1)
 	}
 
-	fmt.Println("Listening on port 6379")
+	fmt.Printf("Listening on port %s\n", port)
 
 	return &nm
 }
