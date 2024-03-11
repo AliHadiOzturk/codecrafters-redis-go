@@ -24,10 +24,6 @@ func keyInArray(key string, arr []string) (bool, int) {
 }
 
 func handleOptions(parameters []string) error {
-	if len(parameters) < 3 {
-		return errors.New("Not enough parameters")
-	}
-
 	for key, value := range options {
 		found, index := keyInArray(key, parameters)
 		if found {
