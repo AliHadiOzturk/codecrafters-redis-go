@@ -16,14 +16,16 @@ type RESPArray struct {
 }
 
 func NewArray(data []byte) *RESPArray {
-	return &RESPArray{Message: models.Message{Data: data, Responses: map[string]interface{}{
-		"":     "-ERR COMMAND NOT FOUND",
-		"PING": "+PONG",
-		"ECHO": commands.Echo,
-		"SET":  commands.Set,
-		"GET":  commands.Get,
-		"INFO": commands.Info,
-	}}}
+	return &RESPArray{Message: models.Message{Data: data,
+		Responses: map[string]interface{}{
+			"":     "-ERR COMMAND NOT FOUND",
+			"PING": "+PONG",
+			"ECHO": commands.Echo,
+			"SET":  commands.Set,
+			"GET":  commands.Get,
+			"INFO": commands.Info,
+		},
+	}}
 }
 
 func (r *RESPArray) Process() []byte {
@@ -38,13 +40,13 @@ func (r *RESPArray) Decode() {
 	strs := strings.Split(stringData, "\r\n")
 
 	if len(strs) < 3 {
-		r.Command = ""
+		r.Request = ""
 		return
 	}
 
 	message := strs[2]
 
-	r.Command = message
+	r.Request = message
 }
 
 func (r *RESPArray) Handle() {
@@ -67,10 +69,10 @@ func (r *RESPArray) Handle() {
 }
 
 func (r *RESPArray) Encode() []byte {
-	response := r.Responses[r.Command]
+	response := r.Responses[r.Request]
 
 	if response == nil {
-		response = r.Responses[strings.ToUpper(r.Command)]
+		response = r.Responses[strings.ToUpper(r.Request)]
 	}
 
 	if response != nil && reflect.TypeOf(response).Kind() == reflect.Func {

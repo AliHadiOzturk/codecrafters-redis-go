@@ -13,7 +13,7 @@ type RESPSimpleString struct {
 }
 
 func NewSimpleString(data []byte) *RESPSimpleString {
-	return &RESPSimpleString{Message: models.Message{Data: data, Command: "DEFAULT", Responses: map[string]interface{}{
+	return &RESPSimpleString{Message: models.Message{Data: data, Request: "DEFAULT", Responses: map[string]interface{}{
 		"":        "-ERR COMMAND NOT FOUND",
 		"DEFAULT": "+OK",
 		"PING":    "+PONG",
@@ -32,14 +32,14 @@ func (r *RESPSimpleString) Decode() {
 	strs := strings.Split(stringData, "\r\n")
 
 	if len(strs) < 2 {
-		r.Command = ""
+		r.Request = ""
 		return
 	} else if len(strs) == 2 {
-		r.Command = strs[0]
+		r.Request = strs[0]
 		return
 	}
 
-	r.Command = strs[1]
+	r.Request = strs[1]
 }
 
 func (r *RESPSimpleString) Handle() {
@@ -48,7 +48,7 @@ func (r *RESPSimpleString) Handle() {
 }
 
 func (r *RESPSimpleString) Encode() []byte {
-	response := r.Responses[r.Command]
+	response := r.Responses[r.Request]
 
 	if response == nil {
 		response = r.Responses[""]

@@ -6,13 +6,14 @@ type MessageHandler interface {
 	Decode()
 	Encode() []byte
 	Response() []byte
+	Send(command string) []byte
 }
 
 type Message struct {
 	Data      []byte
-	Command   string
+	Request   string
 	Args      []string
 	Responses map[string]interface{}
-
+	Commands  map[string]interface{}
 	MessageHandler
 }
