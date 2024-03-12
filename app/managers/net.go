@@ -73,7 +73,9 @@ func (c *Client) Init() {
 			if len(message) == 0 {
 				continue
 			}
-			c.connection.Write(utils.MessageHandler(message).Process())
+			response := utils.MessageHandler(message).Process()
+			fmt.Println("Sending response: ", string(response))
+			c.connection.Write(response)
 		}
 	}
 }

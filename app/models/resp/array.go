@@ -55,7 +55,7 @@ func (r *RESPArray) Handle() {
 
 	parameterCount = parameterCount - 1
 
-	fmt.Printf("Parameter Count: %d", parameterCount)
+	fmt.Printf("Parameter Count: %d\n", parameterCount)
 
 	for i := 3; i < len(strs); i += 2 {
 		if i+1 == len(strs) {
