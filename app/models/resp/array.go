@@ -22,6 +22,7 @@ func NewArray(data []byte) *RESPArray {
 		"ECHO": commands.Echo,
 		"SET":  commands.Set,
 		"GET":  commands.Get,
+		"INFO": commands.Info,
 	}}}
 }
 

@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/app/server.go",
-            "args": ["--port", "6380"]
+            // "args": ["--port", "6380"]
         }
     ]
 }
