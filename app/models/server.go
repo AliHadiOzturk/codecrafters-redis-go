@@ -1,5 +1,7 @@
 package models
 
+import "github.com/codecrafters-io/redis-starter-go/app/common"
+
 var ServerInfo *Server
 
 func InitServer(repllicaOf string) {
@@ -12,6 +14,8 @@ func InitServer(repllicaOf string) {
 					return "master"
 				}
 			}(),
+			master_replid:      common.GenerateRandom(40),
+			master_repl_offset: "0",
 		},
 	}
 }
@@ -21,5 +25,7 @@ type Server struct {
 }
 
 type Replication struct {
-	role string
+	role               string
+	master_replid      string
+	master_repl_offset string
 }
