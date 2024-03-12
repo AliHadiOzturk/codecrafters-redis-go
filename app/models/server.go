@@ -15,7 +15,7 @@ func InitServer(repllicaOf string) {
 				}
 			}(),
 			master_replid:      common.GenerateRandom(40),
-			master_repl_offset: "0",
+			master_repl_offset: 0,
 		},
 	}
 }
@@ -27,5 +27,5 @@ type Server struct {
 type Replication struct {
 	role               string
 	master_replid      string
-	master_repl_offset string
+	master_repl_offset int
 }
