@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/codecrafters-io/redis-starter-go/app/common"
@@ -25,8 +26,9 @@ func InitReplica(repllicaOf string) {
 
 	if repllicaOf != "" {
 		ReplicaInfo.Role = "slave"
-		ReplicaInfo.MasterHost = strings.Split(repllicaOf, " ")[0]
-		ReplicaInfo.MasterPort = strings.Split(repllicaOf, " ")[1]
+		fmt.Println("Replicating to another server...", repllicaOf)
+		ReplicaInfo.MasterHost = strings.Split(repllicaOf, ":")[0]
+		ReplicaInfo.MasterPort = strings.Split(repllicaOf, ":")[1]
 	}
 }
 

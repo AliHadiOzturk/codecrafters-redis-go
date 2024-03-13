@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"strconv"
 
 	"github.com/codecrafters-io/redis-starter-go/app/managers"
 	"github.com/codecrafters-io/redis-starter-go/app/models"
@@ -10,10 +12,28 @@ import (
 func main() {
 
 	port := flag.String("port", "6379", "Port to listen on")
-	replicaOf := flag.String("replicaof", "", "Replicate to another server")
+	replicaHost := flag.String("replicaof", "", "Replicate to another server")
 	flag.Parse()
 
-	models.InitReplica(*replicaOf)
+	var replicaOf string
+
+	args := flag.Args()
+	if len(args) > 0 {
+		lastArg := args[len(args)-1]
+		port, err := strconv.Atoi(lastArg)
+		if err != nil {
+			fmt.Println("Last argument is not an integer")
+		}
+
+		if port > 0 && port < 65536 {
+			replicaOf = fmt.Sprintf("%s:%d", *replicaHost, port)
+
+		} else {
+			fmt.Println("No non-flag arguments provided")
+		}
+	}
+
+	models.InitReplica(replicaOf)
 
 	clientManager := managers.NewClientManager()
 
