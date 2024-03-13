@@ -1,20 +1,18 @@
-package resp
+package messages
 
 import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/codecrafters-io/redis-starter-go/app/models"
 )
 
 type RESPBulkString struct {
-	models.Message
-	models.MessageHandler
+	Message
+	MessageHandler
 }
 
 func NewBulkString(data []byte) *RESPBulkString {
-	return &RESPBulkString{Message: models.Message{Data: data,
+	return &RESPBulkString{Message: Message{Data: data,
 		Responses: map[string]interface{}{},
 		Commands: map[string]interface{}{
 			"PING": "ping",
@@ -53,11 +51,11 @@ func (r *RESPBulkString) Response() []byte {
 	return r.Encode()
 }
 
-func (r *RESPBulkString) Send(command string) []byte {
-	response := r.Responses[command]
+func (r *RESPBulkString) Prepare(command string) []byte {
+	response := r.Commands[command]
 
 	if response == nil {
-		response = r.Responses[""]
+		response = r.Commands[""]
 	}
 
 	if response != nil && reflect.TypeOf(response).Kind() == reflect.String {

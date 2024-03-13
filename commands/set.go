@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/codecrafters-io/redis-starter-go/app/models"
 )
 
 var Registry map[string]interface{}
@@ -44,6 +46,11 @@ func handleOptions(parameters []string) error {
 }
 
 func Set(parameters []string) (string, error) {
+
+	if len(parameters) < 2 {
+		return "", models.NewNotEnoughArgsError("SET")
+	}
+
 	key := parameters[0]
 	value := parameters[1]
 

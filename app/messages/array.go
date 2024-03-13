@@ -1,4 +1,4 @@
-package resp
+package messages
 
 import (
 	"fmt"
@@ -11,19 +11,22 @@ import (
 )
 
 type RESPArray struct {
-	models.Message
-	models.MessageHandler
+	Message
+	MessageHandler
 }
 
 func NewArray(data []byte) *RESPArray {
-	return &RESPArray{Message: models.Message{Data: data,
+	return &RESPArray{Message: Message{Data: data,
 		Responses: map[string]interface{}{
 			"":     "-ERR COMMAND NOT FOUND",
 			"PING": "+PONG",
 			"ECHO": commands.Echo,
 			"SET":  commands.Set,
 			"GET":  commands.Get,
-			"INFO": commands.Info,
+			"INFO": commands.Info(*models.ReplicaInfo),
+		},
+		Commands: map[string]interface{}{
+			"PING": "ping",
 		},
 	}}
 }
@@ -79,7 +82,7 @@ func (r *RESPArray) Encode() []byte {
 		resp, err := response.(func([]string) (string, error))(r.Args)
 
 		if err != nil {
-			// Implement error handling
+			response = fmt.Sprintf("-%s", err.Error())
 		} else {
 			response = resp
 		}
@@ -97,4 +100,28 @@ func (r *RESPArray) Encode() []byte {
 
 func (r *RESPArray) Response() []byte {
 	return r.Encode()
+}
+
+func (r *RESPArray) Prepare(command string) []byte {
+	response := r.Commands[command]
+
+	if response == nil {
+		response = r.Commands[""]
+	}
+
+	if response != nil && reflect.TypeOf(response).Kind() == reflect.String {
+		keywords := strings.Split(response.(string), " ")
+
+		var newResponse string = ""
+
+		for _, keyword := range keywords {
+			newResponse = newResponse + fmt.Sprintf("*%d\r\n%s\r\n", len(keyword), keyword)
+		}
+
+		response = fmt.Sprintf("*%d\r\n%s", len(keywords), newResponse)
+	}
+
+	formatted := fmt.Sprintf("%s\r\n", response)
+
+	return []byte(formatted)
 }

@@ -13,11 +13,15 @@ func main() {
 	replicaOf := flag.String("replicaof", "", "Replicate to another server")
 	flag.Parse()
 
-	models.InitServer(*replicaOf)
+	models.InitReplica(*replicaOf)
 
-	netManager := managers.NewNetManager(*port)
-	go netManager.Init()
-	netManager.Start()
+	clientManager := managers.NewClientManager()
+
+	go clientManager.Init()
+
+	netManager := managers.NewNetManager(clientManager)
+
+	managers.NewReplicaManager(netManager, models.ReplicaInfo).Init(*port)
 
 	// func() {
 	// 	for {

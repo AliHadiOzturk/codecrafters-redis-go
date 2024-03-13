@@ -1,23 +1,20 @@
 package utils
 
-import (
-	"github.com/codecrafters-io/redis-starter-go/app/models"
-	"github.com/codecrafters-io/redis-starter-go/app/models/resp"
-)
+import "github.com/codecrafters-io/redis-starter-go/app/messages"
 
-func MessageHandler(data []byte) models.MessageHandler {
+func MessageHandler(data []byte) messages.MessageHandler {
 	if len(data) == 0 {
-		return resp.NewSimpleString(data)
+		return messages.NewSimpleString(data)
 	}
 
 	switch string(data[0:1]) {
 	case "+":
-		return resp.NewSimpleString(data)
+		return messages.NewSimpleString(data)
 	case "*":
-		return resp.NewArray(data)
+		return messages.NewArray(data)
 	// case "$":
-	// 	return resp.NewArray(data)
+	// 	return messages.NewArray(data)
 	default:
-		return resp.NewSimpleString(data)
+		return messages.NewSimpleString(data)
 	}
 }

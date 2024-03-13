@@ -1,4 +1,4 @@
-package models
+package messages
 
 type MessageHandler interface {
 	Process() []byte
@@ -6,7 +6,7 @@ type MessageHandler interface {
 	Decode()
 	Encode() []byte
 	Response() []byte
-	Send(command string) []byte
+	Prepare(command string) []byte
 }
 
 type Message struct {

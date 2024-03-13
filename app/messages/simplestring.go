@@ -1,19 +1,17 @@
-package resp
+package messages
 
 import (
 	"fmt"
 	"strings"
-
-	"github.com/codecrafters-io/redis-starter-go/app/models"
 )
 
 type RESPSimpleString struct {
-	models.Message
-	models.MessageHandler
+	Message
+	MessageHandler
 }
 
 func NewSimpleString(data []byte) *RESPSimpleString {
-	return &RESPSimpleString{Message: models.Message{Data: data, Request: "DEFAULT", Responses: map[string]interface{}{
+	return &RESPSimpleString{Message: Message{Data: data, Request: "DEFAULT", Responses: map[string]interface{}{
 		"":        "-ERR COMMAND NOT FOUND",
 		"DEFAULT": "+OK",
 		"PING":    "+PONG",
