@@ -115,7 +115,7 @@ func (r *RESPArray) Prepare(command string) []byte {
 		var newResponse string = ""
 
 		for _, keyword := range keywords {
-			newResponse = newResponse + fmt.Sprintf("*%d\r\n%s\r\n", len(keyword), keyword)
+			newResponse = newResponse + fmt.Sprintf("$%d\r\n%s\r\n", len(keyword), keyword)
 		}
 
 		response = fmt.Sprintf("*%d\r\n%s", len(keywords), newResponse)

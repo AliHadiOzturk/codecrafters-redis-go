@@ -17,7 +17,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/app/server.go",
-            "args": ["--port", "6380", "--replicaof", "localhost 6379"]
+            "args": ["--port", "6380", "--replicaof", "localhost", "6379"]
         }
     ]
 }
