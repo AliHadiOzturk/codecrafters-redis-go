@@ -7,6 +7,7 @@ import (
 
 	"github.com/codecrafters-io/redis-starter-go/app/messages"
 	"github.com/codecrafters-io/redis-starter-go/app/models"
+	"github.com/codecrafters-io/redis-starter-go/commands"
 )
 
 type ReplicaManager struct {
@@ -31,59 +32,95 @@ func (rm *ReplicaManager) Init(port string) {
 
 	if !rm.Replica.IsMaster() {
 		go rm.NetManager.Start()
-		for {
+		// for {
 
-			conn, err := rm.NetManager.Connect(rm.Replica.MasterHost, rm.Replica.MasterPort)
+		conn, err := rm.NetManager.Connect(rm.Replica.MasterHost, rm.Replica.MasterPort)
 
-			if err != nil {
-				fmt.Printf("Failed to connect to master at %s:%s", rm.Replica.MasterHost, rm.Replica.MasterPort)
-				time.Sleep(10 * time.Second)
-				continue
-			}
-
-			rm.Connection = conn
-
-			_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypePing, []string{}))
-
-			if err != nil {
-				fmt.Println("Failed to write to master")
-				time.Sleep(10 * time.Second)
-				continue
-			}
-			
-			// TODO: Workaround for the time being
-			time.Sleep(100 * time.Millisecond)
-
-			_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypeReplicaConf, []string{"listening-port", port}))
-
-			if err != nil {
-				fmt.Println("Failed to write to master")
-				time.Sleep(10 * time.Second)
-				continue
-			}
-
-			// TODO: Workaround for the time being
-			time.Sleep(100 * time.Millisecond)
-
-			_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypeReplicaConf, []string{"capa", "psync2"}))
-
-			if err != nil {
-				fmt.Println("Failed to write to master")
-				time.Sleep(10 * time.Second)
-				continue
-			}
-
-			fmt.Printf("Connected to master at %s:%s\n", rm.Replica.MasterHost, rm.Replica.MasterPort)
-
-			rm.Read()
+		if err != nil {
+			fmt.Printf("Failed to connect to master at %s:%s", rm.Replica.MasterHost, rm.Replica.MasterPort)
+			time.Sleep(10 * time.Second)
+			// continue
 		}
+
+		rm.Connection = conn
+
+		err = rm.SendPingToMaster()
+
+		if err != nil {
+			fmt.Println("Failed to send ping to master")
+			time.Sleep(10 * time.Second)
+			// continue
+		}
+
+		err = rm.SendReplConf(commands.RelConfArgTypePort)
+
+		if err != nil {
+			fmt.Println("Failed to send listening port to master")
+			time.Sleep(10 * time.Second)
+			// continue
+		}
+
+		err = rm.SendReplConf(commands.ReplConfArgTypeCapa)
+
+		if err != nil {
+			fmt.Println("Failed to send capa to master")
+			time.Sleep(10 * time.Second)
+			// continue
+		}
+
+		fmt.Printf("Connected to master at %s:%s\n", rm.Replica.MasterHost, rm.Replica.MasterPort)
+
+		rm.Read()
+		// }
 	} else {
 		rm.NetManager.Start()
 	}
 }
 
-func (rm *ReplicaManager) Start() {
+func (rm *ReplicaManager) SendPingToMaster() error {
+	buff := make([]byte, 100)
+	_, err := rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypePing, []string{}))
 
+	if err != nil {
+		return err
+	}
+
+	_, err = rm.Connection.Read(buff)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Received response from master for ping: ", string(buff))
+
+	return nil
+}
+
+func (rm *ReplicaManager) SendReplConf(commandType string) error {
+	buff := make([]byte, 100)
+
+	var err error
+
+	switch commandType {
+	case commands.RelConfArgTypePort:
+		_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypeReplicaConf, []string{"listening-port", rm.Replica.Port}))
+	case commands.ReplConfArgTypeCapa:
+		_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypeReplicaConf, []string{"capa", "psync2"}))
+	}
+
+	if err != nil {
+		return err
+	}
+
+	_, err = rm.Connection.Read(buff)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Received response from master for ReplConf(%s): %s", commandType, string(buff))
+
+	return nil
 }
 
 func (rm *ReplicaManager) Read() {

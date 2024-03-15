@@ -143,7 +143,5 @@ func (r *RESPArray) Prepare(command string, args []string) []byte {
 		}
 	}
 
-	formatted := fmt.Sprintf("%s\r\n", response)
-
-	return []byte(formatted)
+	return []byte(response.(string))
 }
