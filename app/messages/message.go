@@ -6,7 +6,7 @@ type MessageHandler interface {
 	Decode()
 	Encode() []byte
 	Response() []byte
-	Prepare(command string) []byte
+	Prepare(command string, args []string) []byte
 }
 
 type Message struct {

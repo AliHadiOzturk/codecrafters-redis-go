@@ -43,7 +43,29 @@ func (rm *ReplicaManager) Init(port string) {
 
 			rm.Connection = conn
 
-			_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare("PING"))
+			_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypePing, []string{}))
+
+			if err != nil {
+				fmt.Println("Failed to write to master")
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			
+			// TODO: Workaround for the time being
+			time.Sleep(100 * time.Millisecond)
+
+			_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypeReplicaConf, []string{"listening-port", port}))
+
+			if err != nil {
+				fmt.Println("Failed to write to master")
+				time.Sleep(10 * time.Second)
+				continue
+			}
+
+			// TODO: Workaround for the time being
+			time.Sleep(100 * time.Millisecond)
+
+			_, err = rm.Connection.Write(messages.NewArray([]byte{}).Prepare(messages.CommandTypeReplicaConf, []string{"capa", "psync2"}))
 
 			if err != nil {
 				fmt.Println("Failed to write to master")

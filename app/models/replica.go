@@ -10,15 +10,18 @@ import (
 var ReplicaInfo *Replica
 
 type Replica struct {
-	Role                string `resp:"role"`
-	masterReplicaId     string `resp:"master_replid"`
-	masterReplicaOffset string `resp:"master_repl_offset"`
-	MasterHost          string `resp:"-"`
-	MasterPort          string `resp:"-"`
+	Port                string              `resp:"-"`
+	Role                string              `resp:"role"`
+	masterReplicaId     string              `resp:"master_replid"`
+	masterReplicaOffset string              `resp:"master_repl_offset"`
+	MasterHost          string              `resp:"-"`
+	MasterPort          string              `resp:"-"`
+	Replicas            map[string]*Replica `resp:"-"`
 }
 
-func InitReplica(repllicaOf string) {
+func InitReplica(port string, repllicaOf string) {
 	ReplicaInfo = &Replica{
+		Port:                port,
 		Role:                "master",
 		masterReplicaId:     common.GenerateRandom(40),
 		masterReplicaOffset: "0",
@@ -34,4 +37,16 @@ func InitReplica(repllicaOf string) {
 
 func (s *Replica) IsMaster() bool {
 	return s.Role == "master"
+}
+
+func (s *Replica) AddReplica(replica *Replica) {
+	if s.Replicas == nil {
+		s.Replicas = make(map[string]*Replica)
+	}
+
+	s.Replicas[replica.Port] = replica
+}
+
+func (s *Replica) RemoveReplica(port string) {
+	delete(s.Replicas, port)
 }

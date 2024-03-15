@@ -33,7 +33,7 @@ func main() {
 		}
 	}
 
-	models.InitReplica(replicaOf)
+	models.InitReplica(*port, replicaOf)
 
 	clientManager := managers.NewClientManager()
 
